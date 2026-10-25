@@ -548,7 +548,7 @@ When set to `true`, requests from the ASNs listed in [`asn`](#asn-asn) are **blo
 
 #### ASN `asn`
 
-A list of ASNs, written as `AS64500` (case insensitive) or `64500`. Required when `asnApi` is set.
+A list of ASNs, written as `AS64500` (case insensitive) or `64500`. Required when `asnApi` is set in white list mode. In black list mode the list may be empty: no request is blocked by ASN, but the ASN is still fetched and cached (and logged with `logApiRequests`).
 
 ```yaml
 asnApi: "http://geoip:8080/asn/{ip}"

@@ -121,6 +121,15 @@ func TestASNWhitelistMode(t *testing.T) {
 	}
 }
 
+func TestASNEmptyBlacklist(t *testing.T) {
+	server := createMockGeoIPServer(t)
+	handler := newHandler(t, createASNTesterConfig(server, true))
+
+	if code := serveIP(t, handler, asnExampleIP); code != http.StatusOK {
+		t.Errorf("empty ASN blacklist: expected %d, got %d", http.StatusOK, code)
+	}
+}
+
 func TestASNCachedLookUp(t *testing.T) {
 	server := createMockGeoIPServer(t)
 	handler := newHandler(t, createASNTesterConfig(server, true, exampleASN))
@@ -202,7 +211,10 @@ func TestASNInvalidConfig(t *testing.T) {
 	next := http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {})
 
 	tests := map[string]func(cfg *geoblock.Config){
-		"asn api without asn list": func(cfg *geoblock.Config) { cfg.ASN = nil },
+		"asn api without asn whitelist": func(cfg *geoblock.Config) {
+			cfg.ASN = nil
+			cfg.ASNBlackListMode = false
+		},
 		"asn list without asn api": func(cfg *geoblock.Config) { cfg.ASNAPI = "" },
 		"asn api without ip":       func(cfg *geoblock.Config) { cfg.ASNAPI = server.URL + "/asn/" },
 		"invalid asn entry":        func(cfg *geoblock.Config) { cfg.ASN = []string{"ASX"} },

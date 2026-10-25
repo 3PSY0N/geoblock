@@ -169,8 +169,9 @@ func validateConfig(config *Config) error {
 		return fmt.Errorf("asn api uri must contain {ip}")
 	}
 
-	if len(config.ASNAPI) != 0 && len(config.ASN) == 0 {
-		return fmt.Errorf("asn api uri given but no asn provided")
+	// an empty whitelist would deny every request, an empty blacklist denies none
+	if len(config.ASNAPI) != 0 && len(config.ASN) == 0 && !config.ASNBlackListMode {
+		return fmt.Errorf("asn api uri given but no allowed asn provided")
 	}
 
 	if len(config.ASNAPI) == 0 && len(config.ASN) != 0 {
