@@ -171,6 +171,7 @@ This configuration might not work. It's just to give you an idea how to configur
 - `api`: API URI used for querying the country associated with the connecting IP
 - `countries`: list of allowed countries
 - `blackListMode`: set to `false` so the plugin is running in `whitelist mode`
+- `asnApi`, `asnBlackListMode`, `asn`: optional ASN filter, see [ASN filter](#asn-filter)
 
 ```yml
 my-GeoBlock:
@@ -189,6 +190,10 @@ my-GeoBlock:
       unknownCountryApiResponse: "nil"
       blackListMode: false
       addCountryHeader: false
+      asnApi: "http://geoip:8080/asn/{ip}" # optional
+      asnBlackListMode: true
+      asn:
+        - AS64500
       excludedPathPatterns:
         - "^[^/]+/health$"
         - "^[^/]+/status$"
@@ -444,6 +449,16 @@ my-GeoBlock:
         - AX # Åland Islands
 ```
 
+## Local MaxMind lookup service
+
+Instead of a public API, the country and ASN lookups can be served from local MaxMind databases by a small lookup service exposing:
+
+```yml
+api: "http://geoip:8080/country/{ip}"
+asnApi: "http://geoip:8080/asn/{ip}"
+unknownCountryApiResponse: "nil"
+```
+
 ## Configuration options
 
 ### Silent start-up: `silentStartUp`
@@ -518,6 +533,30 @@ When set to `true` the filter logic is inverted, i.e. requests originating from 
 ### Countries `countries`
 
 A list of country codes from which connections to the service should be allowed. Logic can be inverted by using the [`blackListMode`](#black-list-mode-blacklistmode).
+
+### ASN filter
+
+Requests can additionally be filtered by the autonomous system (ASN) of the client IP. The ASN filter is applied after the country filter: a request must pass both. It is disabled unless `asnApi` is set.
+
+#### ASN API `asnApi`
+
+API URI used for querying the ASN associated with the connecting IP, `{ip}` is replaced by the IP address. The API must answer with the ASN as plain text (`AS64500` or `64500`), and `AS0` for an IP without ASN. The local lookup service described in [Local MaxMind lookup service](#local-maxmind-lookup-service) provides such an endpoint. The timeout and failure options of the country API (`apiTimeoutMs`, `ignoreApiTimeout`, `ignoreApiFailures`) also apply to this API.
+
+#### ASN black list mode `asnBlackListMode`
+
+When set to `true`, requests from the ASNs listed in [`asn`](#asn-asn) are **blocked** and all others are allowed. When set to `false` (default), only requests from the listed ASNs are allowed. An IP without ASN (`AS0`) is allowed in black list mode and denied in white list mode, unless `AS0` is listed.
+
+#### ASN `asn`
+
+A list of ASNs, written as `AS64500` (case insensitive) or `64500`. Required when `asnApi` is set.
+
+```yaml
+asnApi: "http://geoip:8080/asn/{ip}"
+asnBlackListMode: true
+asn:
+  - AS64500
+  - AS64501
+```
 
 ### Allowed IP addresses `allowedIPAddresses`
 

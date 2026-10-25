@@ -35,3 +35,24 @@ http:
           countries:
             - GB
             - IS
+    my-plugin-asn:
+      plugin:
+        geoblock:
+          silentStartUp: false
+          allowLocalRequests: true
+          logLocalRequests: true
+          logAllowedRequests: true
+          logApiRequests: true
+          api: "http://geoip:8080/country/{ip}"
+          asnApi: "http://geoip:8080/asn/{ip}"
+          asnBlackListMode: true
+          cacheSize: 15
+          forceMonthlyUpdate: true
+          allowUnknownCountries: false
+          unknownCountryApiResponse: "nil"
+          logFilePath: "/geoblock/geoblockC.log"
+          countries:
+            - GB
+            - IS
+          asn:
+            - AS64500
